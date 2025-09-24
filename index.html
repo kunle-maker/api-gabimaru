@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gabimaru API Playground</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    :root {
+      --primary: #6c5ce7;
+      --primary-dark: #5649c0;
+      --secondary: #00cec9;
+      --dark-bg: #121212;
+      --dark-card: #1e1e1e;
+      --dark-card-hover: #252525;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b0b0;
+      --success: #00b894;
+      --warning: #fdcb6e;
+      --error: #e84393;
+      --border-radius: 12px;
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      background: var(--dark-bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Welcome Screen */
+    #welcome {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      width: 100%;
+      max-width: 500px;
+      padding: 2rem;
+    }
+
+    #welcome .card {
+      background: var(--dark-card);
+      padding: 2.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    #welcome .logo {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    #welcome h1 {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    #welcome p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.8rem;
+      line-height: 1.5;
+    }
+
+    #welcome input {
+      padding: 0.9rem 1.2rem;
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 1rem;
+      margin-bottom: 1.2rem;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      transition: var(--transition);
+    }
+
+    #welcome input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
+    }
+
+    #welcome button {
+      padding: 0.9rem 1.5rem;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      width: 100%;
+      transition: var(--transition);
+      font-size: 1rem;
+    }
+
+    #welcome button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+    }
+
+    /* Main App */
+    #app {
+      width: 100%;
+      max-width: 1400px;
+      padding: 2rem;
+      animation: fadeIn 0.7s ease-in-out;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header-left h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+
+    .header-left p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--dark-card);
+      padding: 0.7rem 1.2rem;
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .user-info i {
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
+
+    .greeting {
+      font-size: 1.4rem;
+      margin-bottom: 2.5rem;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .greeting i {
+      color: var(--secondary);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.8rem;
+    }
+
+    .card {
+      background: var(--dark-card);
+      padding: 1.8rem;
+      border-radius: var(--border-radius);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--primary);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.2rem;
+      gap: 10px;
+    }
+
+    .card-header i {
+      font-size: 1.4rem;
+      color: var(--primary);
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .endpoint-url {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: 'Courier New', monospace;
+      color: var(--secondary);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      transition: var(--transition);
+      max-width: 80%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .endpoint-url:hover {
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+    }
+
+    .endpoint-url.copied {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 0.7rem;
+      margin-bottom: 1.2rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 0.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      transition: var(--transition);
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
+    }
+
+    button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.8rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    button i {
+      font-size: 0.9rem;
+    }
+
+    .card-footer {
+      margin-top: auto;
+    }
+
+    pre {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-primary);
+      padding: 1.2rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      max-height: 200px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-family: 'Courier New', monospace;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile-specific improvements */
+    @media (max-width: 768px) {
+      #welcome h1 {
+        font-size: 1.8rem;
+      }
+      
+      .greeting {
+        font-size: 1.2rem;
+      }
+      
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      
+      /* Mobile button improvements */
+      .input-group {
+        flex-direction: column;
+      }
+      
+      button {
+        padding: 1rem 1.5rem;
+        font-size: 1.1rem;
+        min-height: 54px;
+      }
+      
+      button i {
+        font-size: 1.1rem;
+      }
+      
+      .card button:not(.input-group button) {
+        width: 100%;
+        padding: 1.2rem;
+        font-size: 1.1rem;
+        min-height: 56px;
+      }
+      
+      .endpoint-url {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-bottom: 1rem;
+        max-width: 100%;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #welcome .card {
+        padding: 2rem 1.5rem;
+      }
+      
+      #app {
+        padding: 1rem;
+      }
+      
+      .card {
+        padding: 1.5rem;
+      }
+      
+      /* Even larger buttons for very small screens */
+      button {
+        padding: 1.2rem 1.5rem;
+        font-size: 1.15rem;
+        min-height: 58px;
+      }
+      
+      .card button:not(.input-group button) {
+        padding: 1.3rem;
+        font-size: 1.15rem;
+        min-height: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Welcome Screen -->
+  <div id="welcome">
+    <div class="card">
+      <div class="logo">
+        <i class="fas fa-code"></i>
+      </div>
+      <h1>Welcome to Gabimaru's API</h1>
+      <p>Enter your name to proceed.</p>
+      <input type="text" id="username" placeholder="Your name...">
+      <button onclick="enterApp()">
+        <i class="fas fa-arrow-right"></i> Proceed to API
+      </button>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app" class="hidden">
+    <header>
+      <div class="header-left">
+        <h1><i class="fas fa-cloud"></i> Gabimaru API</h1>
+        <p>Creating history with javascript.</p>
+      </div>
+      <div class="user-info">
+        <i class="fas fa-user"></i>
+        <span id="user-display">User</span>
+      </div>
+    </header>
+
+    <div class="greeting">
+      <i class="fas fa-hand-wave"></i>
+      <span id="greeting"></span>
+    </div>
+
+    <div class="grid">
+      <!-- Anime Character -->
+      <div class="card">
+        <div class="endpoint-url" data-endpoint="/api/animechar?name=">GET /api/animechar?name=</div>
+        <div class="card-header">
+          <i class="fas fa-user-ninja"></i>
+          <h2>Anime Character</h2>
+        </div>
+        <div class="input-group">
+          <input type="text" id="animechar-input" placeholder="Enter character name...">
+          <button onclick="fetchAPI('/api/animechar?name=', 'animechar-input', 'animechar-output')">
+            <i class="fas fa-search"></i> Fetch
+          </button>
+        </div>
+        <div class="card-footer">
+          <pre id="animechar-output">Output will appear here...</pre>
+        </div>
+      </div>
+
+      <!-- Chatbot -->
+      <div class="card">
+        <div class="endpoint-url" data-endpoint="/chatbot?ask=">GET /chatbot?ask=</div>
+        <div class="card-header">
+          <i class="fas fa-robot"></i>
+          <h2>Chatbot</h2>
+        </div>
+        <div class="input-group">
+          <input type="text" id="chatbot-input" placeholder="Ask something...">
+          <button onclick="fetchAPI('/chatbot?ask=', 'chatbot-input', 'chatbot-output')">
+            <i class="fas fa-comment"></i> Ask
+          </button>
+        </div>
+        <div class="card-footer">
+          <pre id="chatbot-output">Output will appear here...</pre>
+        </div>
+      </div>
+
+      <!-- TikTok Downloader -->
+      <div class="card">
+        <div class="endpoint-url" data-endpoint="/tiktokdl?url=">GET /tiktokdl?url=</div>
+        <div class="card-header">
+          <i class="fab fa-tiktok"></i>
+          <h2>TikTok Downloader</h2>
+        </div>
+        <div class="input-group">
+          <input type="text" id="tiktok-input" placeholder="Enter TikTok URL...">
+          <button onclick="fetchAPI('/tiktokdl?url=', 'tiktok-input', 'tiktok-output')">
+            <i class="fas fa-download"></i> Download
+          </button>
+        </div>
+        <div class="card-footer">
+          <pre id="tiktok-output">Output will appear here...</pre>
+        </div>
+      </div>
+
+      <!-- Instagram Downloader -->
+      <div class="card">
+        <div class="endpoint-url" data-endpoint="/instadl?url=">GET /instadl?url=</div>
+        <div class="card-header">
+          <i class="fab fa-instagram"></i>
+          <h2>Instagram Downloader</h2>
+        </div>
+        <div class="input-group">
+          <input type="text" id="insta-input" placeholder="Enter Instagram URL...">
+          <button onclick="fetchAPI('/instadl?url=', 'insta-input', 'insta-output')">
+            <i class="fas fa-download"></i> Download
+          </button>
+        </div>
+        <div class="card-footer">
+          <pre id="insta-output">Output will appear here...</pre>
+        </div>
+      </div>
+
+      <!-- Facebook Downloader -->
+      <div class="card">
+        <div class="endpoint-url" data-endpoint="/fbdl?url=">GET /fbdl?url=</div>
+        <div class="card-header">
+          <i class="fab fa-facebook"></i>
+          <h2>Facebook Downloader</h2>
+        </div>
+        <div class="input-group">
+          <input type="text" id="fb-input" placeholder="Enter Facebook URL...">
+          <button onclick="fetchAPI('/fbdl?url=', 'fb-input', 'fb-output')">
+            <i class="fas fa-download"></i> Download
+          </button>
+        </div>
+        <div class="card-footer">
+          <pre id="fb-output">Output will appear here...</pre>
+        </div>
+      </div>
+
+      <!-- All-in-one Downloader -->
+      <div class="card">
+        <div class="endpoint-url" data-endpoint="/dl?url=">GET /dl?url=</div>
+        <div class="card-header">
+          <i class="fas fa-download"></i>
+          <h2>All-in-One Downloader</h2>
+        </div>
+        <div class="input-group">
+          <input type="text" id="dl-input" placeholder="Enter media URL...">
+          <button onclick="fetchAPI('/dl?url=', 'dl-input', 'dl-output')">
+            <i class="fas fa-download"></i> Download
+          </button>
+        </div>
+        <div class="card-footer">
+          <pre id="dl-output">Output will appear here...</pre>
+        </div>
+      </div>
+
+      <!-- Waifu -->
+      <div class="card">
+        <div class="endpoint-url" data-endpoint="/waifu">GET /waifu</div>
+        <div class="card-header">
+          <i class="fas fa-image"></i>
+          <h2>Waifu Image</h2>
+        </div>
+        <button onclick="fetchSimple('/waifu', 'waifu-output')">
+          <i class="fas fa-image"></i> Get Waifu
+        </button>
+        <div class="card-footer">
+          <pre id="waifu-output">Output will appear here...</pre>
+        </div>
+      </div>
+
+      <!-- NSFW Waifu -->
+      <div class="card">
+        <div class="endpoint-url" data-endpoint="/nsfw">GET /nsfw</div>
+        <div class="card-header">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h2>NSFW Waifu</h2>
+        </div>
+        <button onclick="fetchSimple('/nsfw', 'nsfw-output')">
+          <i class="fas fa-image"></i> Get NSFW
+        </button>
+        <div class="card-footer">
+          <pre id="nsfw-output">Output will appear here...</pre>
+        </div>
+      </div>
+
+      <!-- Bible Verse -->
+      <div class="card">
+        <div class="endpoint-url" data-endpoint="/bibleverse?verse=">GET /bibleverse?verse=</div>
+        <div class="card-header">
+          <i class="fas fa-book"></i>
+          <h2>Bible Verse</h2>
+        </div>
+        <div class="input-group">
+          <input type="text" id="bible-input" placeholder="e.g. John 3:16">
+          <button onclick="fetchAPI('/bibleverse?verse=', 'bible-input', 'bible-output')">
+            <i class="fas fa-search"></i> Fetch
+          </button>
+        </div>
+        <div class="card-footer">
+          <pre id="bible-output">Output will appear here...</pre>
+        </div>
+      </div>
+
+      <!-- Quote -->
+      <div class="card">
+        <div class="endpoint-url" data-endpoint="/quote">GET /quote</div>
+        <div class="card-header">
+          <i class="fas fa-quote-left"></i>
+          <h2>Random Quote</h2>
+        </div>
+        <button onclick="fetchSimple('/quote', 'quote-output')">
+          <i class="fas fa-quote-right"></i> Get Quote
+        </button>
+        <div class="card-footer">
+          <pre id="quote-output">Output will appear here...</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function enterApp() {
+      const name = document.getElementById('username').value.trim();
+      if (!name) {
+        alert("Please enter your name!");
+        return;
+      }
+
+      document.getElementById('welcome').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      document.getElementById('greeting').textContent = `Hello, ${name}! Ready to explore the APIs?`;
+      document.getElementById('user-display').textContent = name;
+      
+      // Store username for future sessions
+      localStorage.setItem('apiPlaygroundUser', name);
+    }
+
+    // Check if user already exists in localStorage
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('apiPlaygroundUser');
+      if (savedUser) {
+        document.getElementById('welcome').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        document.getElementById('greeting').textContent = `Welcome back, ${savedUser}!`;
+        document.getElementById('user-display').textContent = savedUser;
+      }
+      
+      // Add click event listeners to endpoint URLs
+      document.querySelectorAll('.endpoint-url').forEach(endpoint => {
+        endpoint.addEventListener('click', function() {
+          const endpointText = this.getAttribute('data-endpoint');
+          copyToClipboard(endpointText);
+          
+          // Visual feedback
+          const originalText = this.textContent;
+          this.textContent = 'Copied!';
+          this.classList.add('copied');
+          
+          setTimeout(() => {
+            this.textContent = originalText;
+            this.classList.remove('copied');
+          }, 2000);
+        });
+      });
+    });
+
+    // Copy to clipboard function
+    function copyToClipboard(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+
+    async function fetchAPI(endpoint, inputId, outputId) {
+      const input = document.getElementById(inputId).value.trim();
+      const output = document.getElementById(outputId);
+
+      if (!input) {
+        output.textContent = "Please enter a value.";
+        return;
+      }
+
+      output.textContent = "Loading...";
+      
+      try {
+        const res = await fetch(endpoint + encodeURIComponent(input));
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const data = await res.json();
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.textContent = "Error: " + err.message;
+      }
+    }
+
+    async function fetchSimple(endpoint, outputId) {
+      const output = document.getElementById(outputId);
+      output.textContent = "Loading...";
+      
+      try {
+        const res = await fetch(endpoint);
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const data = await res.json();
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.textContent = "Error: " + err.message;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: quote-scraper-api
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node index.js
+    region: oregon
+    autoDeploy: true
