@@ -19,6 +19,24 @@ function getBaseUrl(req) {
   return `${req.protocol}://${req.get('host')}`;
 }
 
+function simplify(raw) {
+  if (!raw) return null;
+  return {
+    id: raw.id,
+    author: raw.author,
+    username: raw.unique_id,
+    title: raw.title,
+    thumbnail: raw.thumbnail,
+    duration: raw.duration,
+    medias: raw.medias?.map(m => ({
+      url: m.url,
+      quality: m.quality,
+      type: m.type,
+      extension: m.extension
+    }))
+  };
+}
+
 function startSelfPing(app) {
   let baseUrl = null;
   
@@ -50,7 +68,6 @@ function startSelfPing(app) {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Health check
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy', 
@@ -69,8 +86,7 @@ app.get('/api/animechar', async (req, res) => {
     });  
   }  
   
-  try {  
-    // Search for the character  
+  try {
     const searchResponse = await axios.get(`https://api.jikan.moe/v4/characters`, {  
       params: { q: name }  
     });  
@@ -85,12 +101,10 @@ app.get('/api/animechar', async (req, res) => {
     }  
   
     const character = results[0];  
-  
-    // Fetch character details  
+    
     const detailsResponse = await axios.get(`https://api.jikan.moe/v4/characters/${character.mal_id}/full`);  
     const details = detailsResponse.data.data;  
-  
-    // Extract anime information  
+    
     const anime = details.anime?.[0]?.anime?.title || 'Unknown';  
   
     res.json({  
@@ -161,30 +175,20 @@ app.get('/chatbot', async (req, res) => {
 app.get('/tiktokdl', async (req, res) => {
   const url = req.query.url;
   if (!url) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Missing ?url= parameter',
-      creator: 'Gabimaru'
-    });
+    return res.status(400).json({ status: 'error', message: 'Missing ?url=', creator: 'Gabimaru' });
   }
 
   try {
-    const response = await axios.get('https://api-toxxic.zone.id/api/downloader/aio', {
-      params: { url }
-    });
+    const response = await axios.get('https://api-toxxic.zone.id/api/downloader/aio', { params: { url } });
+    const simplified = simplify(response.data?.data?.data);
 
-    res.json({
-      status: 'success',
-      platform: 'tiktok',
-      data: response.data,
-      creator: 'Gabimaru'
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to fetch TikTok video',
-      creator: 'Gabimaru'
-    });
+    if (!simplified) {
+      return res.status(500).json({ status: 'error', message: 'Unexpected API response', creator: 'Gabimaru' });
+    }
+
+    res.json({ status: 'success', platform: 'tiktok', data: simplified, creator: 'Gabimaru' });
+  } catch {
+    res.status(500).json({ status: 'error', message: 'Failed to fetch TikTok video', creator: 'Gabimaru' });
   }
 });
 
@@ -192,30 +196,20 @@ app.get('/tiktokdl', async (req, res) => {
 app.get('/instadl', async (req, res) => {
   const url = req.query.url;
   if (!url) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Missing ?url= parameter',
-      creator: 'Gabimaru'
-    });
+    return res.status(400).json({ status: 'error', message: 'Missing ?url=', creator: 'Gabimaru' });
   }
 
   try {
-    const response = await axios.get('https://api-toxxic.zone.id/api/downloader/aio', {
-      params: { url }
-    });
+    const response = await axios.get('https://api-toxxic.zone.id/api/downloader/aio', { params: { url } });
+    const simplified = simplify(response.data?.data?.data);
 
-    res.json({
-      status: 'success',
-      platform: 'instagram',
-      data: response.data,
-      creator: 'Gabimaru'
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to fetch Instagram media',
-      creator: 'Gabimaru'
-    });
+    if (!simplified) {
+      return res.status(500).json({ status: 'error', message: 'Unexpected API response', creator: 'Gabimaru' });
+    }
+
+    res.json({ status: 'success', platform: 'instagram', data: simplified, creator: 'Gabimaru' });
+  } catch {
+    res.status(500).json({ status: 'error', message: 'Failed to fetch Instagram media', creator: 'Gabimaru' });
   }
 });
 
@@ -223,67 +217,107 @@ app.get('/instadl', async (req, res) => {
 app.get('/fbdl', async (req, res) => {
   const url = req.query.url;
   if (!url) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Missing ?url= parameter',
-      creator: 'Gabimaru'
-    });
+    return res.status(400).json({ status: 'error', message: 'Missing ?url=', creator: 'Gabimaru' });
   }
 
   try {
-    const response = await axios.get('https://api-toxxic.zone.id/api/downloader/aio', {
-      params: { url }
-    });
+    const response = await axios.get('https://api-toxxic.zone.id/api/downloader/aio', { params: { url } });
+    const simplified = simplify(response.data?.data?.data);
 
-    res.json({
-      status: 'success',
-      platform: 'facebook',
-      data: response.data,
-      creator: 'Gabimaru'
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to fetch Facebook video',
-      creator: 'Gabimaru'
-    });
+    if (!simplified) {
+      return res.status(500).json({ status: 'error', message: 'Unexpected API response', creator: 'Gabimaru' });
+    }
+
+    res.json({ status: 'success', platform: 'facebook', data: simplified, creator: 'Gabimaru' });
+  } catch {
+    res.status(500).json({ status: 'error', message: 'Failed to fetch Facebook video', creator: 'Gabimaru' });
   }
 });
 
-// All-in-one Downloader
-app.get('/dl', async (req, res) => {
+app.get(['/dl', '/aio'], async (req, res) => {
   const url = req.query.url;
   if (!url) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Missing ?url= parameter',
-      creator: 'Gabimaru'
-    });
+    return res.status(400).json({ status: 'error', message: 'Missing ?url=', creator: 'Gabimaru' });
   }
 
   try {
-    const response = await axios.get('https://api-toxxic.zone.id/api/downloader/aio', {
-      params: { url }
-    });
+    const response = await axios.get('https://api-toxxic.zone.id/api/downloader/aio', { params: { url } });
+    const simplified = simplify(response.data?.data?.data);
 
-    res.json({
-      status: 'success',
-      platform: 'auto-detect',
-      data: response.data,
-      creator: 'Gabimaru'
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to fetch media',
-      creator: 'Gabimaru'
-    });
+    if (!simplified) {
+      return res.status(500).json({ status: 'error', message: 'Unexpected API response', creator: 'Gabimaru' });
+    }
+
+    res.json({ status: 'success', platform: 'auto-detect', data: simplified, creator: 'Gabimaru' });
+  } catch {
+    res.status(500).json({ status: 'error', message: 'Failed to fetch media', creator: 'Gabimaru' });
   }
 });
 
+app.get('/fancy', (req, res) => {  
+  const text = req.query.text;  
+  const style = req.query.style || 'all';  
+    
+  if (!text) {    
+    return res.status(400).json({    
+      status: 'error',    
+      message: 'Missing ?text= parameter',    
+      creator: 'Gabimaru'    
+    });    
+  }    
+  
+  const fontStyles = {
+  bold: '𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇',
+  italic: '𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘌𝘝𝘞𝘟𝘠𝘡𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻',
+  boldItalic: '𝘼𝘽𝘾𝘿𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉𝙊𝙋𝙌𝙍𝙎𝙏𝙐𝙑𝙒𝙓𝙔𝙕𝙖𝙗𝙘𝙙𝙚𝙛𝙜𝙝𝙞𝙟𝙠𝙡𝙢𝙣𝙤𝙥𝙦𝙧𝙨𝙩𝙪𝙫𝙬𝙭𝙮𝙯',
+  script: '𝒜𝐵𝒞𝒟𝐸𝐹𝒢𝐻𝐼𝒥𝒦𝐿𝑀𝒩𝒪𝒫𝒬𝑅𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵𝒶𝒷𝒸𝒹𝑒𝒻𝑔𝒽𝒾𝒿𝓀𝓁𝓂𝓃𝑜𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏',
+  boldScript: '𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃',
+  mono: '𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣',
+  doubleStruck: '𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫',
+  circled: 'ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ',
+  squared: '🄰🄱🄲🄳🄴🄵🄶🄷🄸🄹🄺🄻🄼🄽🄾🄿🅀🅁🅂🅃🅄🅅🅆🅇🅈🅉🄰🄱🄲🄳🄴🄵🄶🄷🄸🄹🄺🄻🄼🄽🄾🄿🅀🅁🅂🅃🅄🅅🅆🅇🅈🅉',
+  gothic: '𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷',
+  smallCaps: 'ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ',
+  upsideDown: '∀ᗺƆᗡƎℲ⅁HIſʞ˥WNOԀὉᴚS⊥UVWXYZoʍxʎzɐqɔpǝɟƃɥᴉɾʞlɯuodbɹsʇnʌʍxʎz',
+  reversed: 'ZYXWVUTSRQPONMLKJIHGFEDCBAzyxwvutsrqponmlkjihgfedcba',
+  tiny: 'ᵃᵇᶜᵈᵉᶠᵍʰᶦʲᵏˡᵐⁿᵒᵖᵠʳˢᵗᵘᵛʷˣʸᶻ',
+  wide: 'ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ',
+  bubble: 'ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ',
+  blackSquare: '🅰🅱🅲🅳🅴🅵🅶🅷🅸🅹🅺🅻🅼🅽🅾🅿🆀🆁🆂🆃🆄🆅🆆🆇🆈🆉',
+  fairy: 'ᏗᏰፈᎴᏋᎦᎶᏂᎥᏠᏦᏝᎷᏁᎧᎮᎤᏒᏕᏖᏬᏉᏇጀᎩᏃ'
+};
+  
+  const normalAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';  
+    
+  function convertText(inputText, fontMap) {  
+    return inputText.split('').map(char => {  
+      const index = normalAlphabet.indexOf(char);  
+      return index !== -1 ? fontMap[index] : char;  
+    }).join('');  
+  }  
+  
+  let result;  
+  if (style === 'all') {  
+    result = {};  
+    Object.keys(fontStyles).forEach(font => {  
+      result[font] = convertText(text, fontStyles[font]);  
+    });  
+  } else {  
+    result = convertText(text, fontStyles[style] || fontStyles.bold);  
+  }  
+  
+  res.json({  
+    status: 'success',  
+    original: text,  
+    fonts: result,  
+    available_styles: Object.keys(fontStyles),  
+    creator: 'Gabimaru'  
+  });  
+}); 
+
 app.get('/aipic', async (req, res) => {
-  const genask = req.query.prompt;
-  if (!genask) {
+  const prompt = req.query.prompt;
+  if (!prompt) {
     return res.status(400).json({
       status: 'error',
       message: 'Missing ?prompt= parameter',
@@ -293,48 +327,31 @@ app.get('/aipic', async (req, res) => {
 
   try {
     const response = await axios.get('https://api-toxxic.zone.id/api/ai/ai4chat', {
-      params: { prompt: genask }
+      params: { prompt }
     });
+
+    const raw = response.data?.data;
+    if (!raw) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Unexpected API response',
+        creator: 'Gabimaru'
+      });
+    }
+
+    const simplified = {
+      url: raw,
+    };
 
     res.json({
       status: 'success',
-      data: response.data,
+      image: simplified,
       creator: 'Gabimaru'
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({
       status: 'error',
-      message: 'Failed to fetch media',
-      creator: 'Gabimaru'
-    });
-  }
-});
-
-app.get('/aio', async (req, res) => {
-  const url = req.query.url;
-  if (!url) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Missing ?url= parameter',
-      creator: 'Gabimaru'
-    });
-  }
-
-  try {
-    const response = await axios.get('https://api-toxxic.zone.id/api/downloader/aio', {
-      params: { url }
-    });
-
-    res.json({
-      status: 'success',
-      platform: 'auto-detect',
-      data: response.data,
-      creator: 'Gabimaru'
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to fetch media',
+      message: 'Failed to fetch AI image',
       creator: 'Gabimaru'
     });
   }

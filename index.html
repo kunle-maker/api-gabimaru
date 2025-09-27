@@ -503,7 +503,25 @@
           <pre id="tiktok-output">Output will appear here...</pre>
         </div>
       </div>
-
+      
+      <!-- AI Picture Generator -->
+<div class="card">
+  <div class="endpoint-url" data-endpoint="/aipic?prompt=">GET /aipic?prompt=</div>
+  <div class="card-header">
+    <i class="fas fa-magic"></i>
+    <h2>AI Picture</h2>
+  </div>
+  <div class="input-group">
+    <input type="text" id="aipic-input" placeholder="Enter your prompt...">
+    <button onclick="fetchAPI('/aipic?prompt=', 'aipic-input', 'aipic-output')">
+      <i class="fas fa-wand-magic-sparkles"></i> Generate
+    </button>
+  </div>
+  <div class="card-footer">
+    <pre id="aipic-output">Output will appear here...</pre>
+  </div>
+</div>
+      
       <!-- Instagram Downloader -->
       <div class="card">
         <div class="endpoint-url" data-endpoint="/instadl?url=">GET /instadl?url=</div>
